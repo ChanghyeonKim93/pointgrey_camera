@@ -1,0 +1,94 @@
+#include "flycapture/FlyCapture2.h"
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+#include <iostream>
+
+class Pointgrey:public FlyCapture2{
+
+public:
+  struct calibration {
+      double fx;  //  focal length (in pixels)
+      double fy;  //  focal length (in pixels)
+      double cx;  //  principal point (u-coordinate)
+      double cy;  //  principal point (v-coordinate)
+      calibration () {
+        fx = 0.0;
+        fy = 0.0;
+        cx = 0.0;
+        cy = 0.0;
+      }
+  };
+  //constructor
+  Pointgrey(const int _SIZE=VIDEOMODE_640x480Y8, const int _FRAMERATE = FRAMERATE_30){
+
+    error = camera.Connect( 0 );
+    if ( error != PGRERROR_OK )
+    {
+        std::cout << "Failed to connect to pointgrey camera : no device" << std::endl;
+    }
+
+    // Get the camera info and print it out
+    error = camera.GetCameraInfo( &camInfo );
+    if ( error != PGRERROR_OK )
+    {
+        std::cout << "Failed to get camera info from pointgrey camera" << std::endl;
+    }
+    std::cout << camInfo.vendorName << " "
+              << camInfo.modelName << " "
+              << camInfo.serialNumber << std::endl;
+
+    error = camera.StartCapture();
+    if ( error == PGRERROR_ISOCH_BANDWIDTH_EXCEEDED )
+    {
+        std::cout << "Bandwidth exceeded" << std::endl;
+    }
+    else if ( error != PGRERROR_OK )
+    {
+        std::cout << "Failed to start image capture" << std::endl;
+    }
+    error = camera.SetVideoModeAndFrameRate( VIDEOMODE_640x480Y8 , FRAMERATE_30);
+    if(error!=PGRERROR_OK){
+      std::cout<< "Failed to set the frame rate and image size"<<std::endl;
+    }
+
+  };
+  //destructor
+  ~Pointgrey(){
+
+  };
+
+  void pointgreyInit(const int _SHUTTER=7, const int _BRIGHTNESS=0.5, const float _GAIN=20.0){
+    prop.type = SHUTTER;
+    //Ensure the property is on.
+    prop.onOff = true;
+    //Ensure auto-adjust mode is off.
+    prop.autoManualMode = false;
+    //Ensure the property is set up to use absolute value control.
+    prop.absControl = true;
+    //Set the absolute value of shutter to 20 ms.
+    prop.absValue = _SHUTTER;
+    error = camera.SetProperty( &prop );
+
+    //Set the property.
+    prop.type = BRIGHTNESS;
+    prop.absControl = true;
+    prop.absValue =_BRIGHTNESS;
+
+
+    error = camera.SetProperty( &prop );
+
+    prop.type = GAIN;
+    prop.autoManualMode = false;
+    prop.absControl = true;
+    prop.absValue=_GAIN;
+    error = camera.SetProperty( &prop );
+  }
+private:
+  FlyCapture2::Error error;
+  FlyCapture2::Camera camera;
+  FlyCapture2::CameraInfo camInfo;
+  FlyCapture2::Property prop;
+
+};

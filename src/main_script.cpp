@@ -1,5 +1,5 @@
 #include "flycapture/FlyCapture2.h"
-
+#include "pointgreyStream.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
@@ -9,73 +9,18 @@ using namespace FlyCapture2;
 
 int main()
 {
-    FlyCapture2::Error error;
-    FlyCapture2::Camera camera;
-    FlyCapture2::CameraInfo camInfo;
-/// Connect the camera
-    error = camera.Connect( 0 );
-    if ( error != PGRERROR_OK )
-    {
-        std::cout << "Failed to connect to camera" << std::endl;
-        return false;
-    }
+    cv::Mat curr_image_;
+    PointgreyStream *mypointgrey = new PointgreyStream();
+    mypointgrey->pointgreyInit(7,0.5,20.0);
 
-    // Get the camera info and print it out
-    error = camera.GetCameraInfo( &camInfo );
-    if ( error != PGRERROR_OK )
-    {
-        std::cout << "Failed to get camera info from camera" << std::endl;
-        return false;
-    }
-    std::cout << camInfo.vendorName << " "
-              << camInfo.modelName << " "
-              << camInfo.serialNumber << std::endl;
-
-    error = camera.StartCapture();
-    if ( error == PGRERROR_ISOCH_BANDWIDTH_EXCEEDED )
-    {
-        std::cout << "Bandwidth exceeded" << std::endl;
-        return false;
-    }
-    else if ( error != PGRERROR_OK )
-    {
-        std::cout << "Failed to start image capture" << std::endl;
-        return false;
-    }
-
-    // capture loop
     char key = 0;
-    while(key != 'q')
-    {
-        // Get the image
-        Image rawImage;
-        Error error = camera.RetrieveBuffer( &rawImage );
-        if ( error != PGRERROR_OK )
-        {
-                std::cout << "capture error" << std::endl;
-                continue;
-        }
 
-        // convert to rgb
-        Image rgbImage;
-        rawImage.Convert( FlyCapture2::PIXEL_FORMAT_BGR, &rgbImage );
-
-        // convert to OpenCV Mat
-        unsigned int rowBytes = (double)rgbImage.GetReceivedDataSize()/(double)rgbImage.GetRows();
-        cv::Mat image = cv::Mat(rgbImage.GetRows(), rgbImage.GetCols(), CV_8UC3, rgbImage.GetData(),rowBytes);
-
-        cv::imshow("image", image);
-        key = cv::waitKey(30);
+    while(key!='q'){
+      mypointgrey->getData();
+     curr_image_=  mypointgrey->curr_image;
+     cv::imshow("image", curr_image_);
+     key=cv::waitKey(1);
     }
-
-    error = camera.StopCapture();
-    if ( error != PGRERROR_OK )
-    {
-        // This may fail when the camera was removed, so don't show
-        // an error message
-    }
-
-    camera.Disconnect();
 
     return 0;
 }
