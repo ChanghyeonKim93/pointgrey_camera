@@ -12,11 +12,14 @@ LIST(APPEND LINK_LIBS
 ${PGRFLYCAP_LIB_DIR}/libflycapture.so
 }
 
+For setting the properties of pointgrey camera, refer the 'FlyCapture API Code Samples',
+https://www.manualslib.com/manual/821605/Point-Grey-Flea3-Gige.html?page=98#manual
 
 // setting the camera properties 
+#Setting a standard video mode, format and frame rate using the flycapture api
+Camera.SetVideoModeandFrameRate( VIDEOMODE_640x480Y8 , FRAMERATE_60 );
+
 #Setting Brightness Using the FlyCapture API
-
-
 //Declare a Property struct.
 Property prop;
 //Define the property to adjust.
