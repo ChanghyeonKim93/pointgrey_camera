@@ -1,4 +1,4 @@
-# pointgrey_camera
+# pointgrey_camera_C++_CLASS_VERSION
 pointgrey flycapture2
 
 1. download 'flycapture2-2.9.3.43-amd64' from the pointgrey website
